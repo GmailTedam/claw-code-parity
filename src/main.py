@@ -16,6 +16,8 @@ from .session_store import load_session
 from .setup import run_setup
 from .tool_pool import assemble_tool_pool
 from .tools import execute_tool, get_tool, get_tools, render_tool_index
+from .slash_commands import parse_slash_command, render_help, render_slash_command_index, slash_command_specs
+from .slash_handlers import dispatch_slash_command
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -88,6 +90,13 @@ def build_parser() -> argparse.ArgumentParser:
     exec_tool_parser = subparsers.add_parser('exec-tool', help='execute a mirrored tool shim by exact name')
     exec_tool_parser.add_argument('name')
     exec_tool_parser.add_argument('payload')
+
+    subparsers.add_parser('slash-commands', help='list all slash command specs')
+    slash_cat_parser = subparsers.add_parser('slash-commands-category', help='list slash commands by category')
+    slash_cat_parser.add_argument('category', choices=['bullettrain', 'healthcare', 'feature-gated'])
+    subparsers.add_parser('slash-help', help='render slash command help text')
+    slash_exec_parser = subparsers.add_parser('slash-exec', help='execute a slash command')
+    slash_exec_parser.add_argument('input_text')
     return parser
 
 
@@ -203,6 +212,26 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.handled else 1
     if args.command == 'exec-tool':
         result = execute_tool(args.name, args.payload)
+        print(result.message)
+        return 0 if result.handled else 1
+    if args.command == 'slash-commands':
+        print(render_slash_command_index())
+        return 0
+    if args.command == 'slash-commands-category':
+        print(render_slash_command_index(args.category))
+        return 0
+    if args.command == 'slash-help':
+        print(render_help())
+        return 0
+    if args.command == 'slash-exec':
+        parsed = parse_slash_command(args.input_text)
+        if parsed is None:
+            print(f'Not a slash command: {args.input_text}')
+            return 1
+        result = dispatch_slash_command(parsed)
+        if result is None:
+            print(f'No handler for /{parsed.name} (core CLI command — handled by runtime)')
+            return 0
         print(result.message)
         return 0 if result.handled else 1
     parser.error(f'unknown command: {args.command}')
