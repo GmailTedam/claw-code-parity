@@ -1033,5 +1033,80 @@
     "name": "voice",
     "source_hint": "commands/voice/voice.ts",
     "responsibility": "Command module mirrored from archived TypeScript path commands/voice/voice.ts"
+  },
+  {
+    "name": "scaffold",
+    "source_hint": "commands/scaffold (BulletTrain parity)",
+    "responsibility": "Generate model scaffolding with fields — Super Scaffolding parity for BulletTrain SaaS workflows"
+  },
+  {
+    "name": "scaffold:api",
+    "source_hint": "commands/scaffold:api (BulletTrain parity)",
+    "responsibility": "Generate API-only scaffold without views — API-first scaffolding for BulletTrain"
+  },
+  {
+    "name": "scaffold:join",
+    "source_hint": "commands/scaffold:join (BulletTrain parity)",
+    "responsibility": "Generate join model between two models — association scaffolding for BulletTrain"
+  },
+  {
+    "name": "team",
+    "source_hint": "commands/team (BulletTrain parity)",
+    "responsibility": "Manage team members and invitations — team lifecycle management for BulletTrain"
+  },
+  {
+    "name": "roles",
+    "source_hint": "commands/roles (BulletTrain parity)",
+    "responsibility": "Manage role definitions — RBAC management for BulletTrain"
+  },
+  {
+    "name": "api",
+    "source_hint": "commands/api (BulletTrain parity)",
+    "responsibility": "Manage API versions and endpoints — versioned API management for BulletTrain"
+  },
+  {
+    "name": "billing",
+    "source_hint": "commands/billing (BulletTrain parity)",
+    "responsibility": "Manage billing plans and subscriptions — billing lifecycle for BulletTrain"
+  },
+  {
+    "name": "action",
+    "source_hint": "commands/action (BulletTrain parity)",
+    "responsibility": "Manage action models — action model scaffolding for BulletTrain"
+  },
+  {
+    "name": "webhook",
+    "source_hint": "commands/webhook (BulletTrain parity)",
+    "responsibility": "Manage webhooks and integrations — webhook lifecycle for BulletTrain"
+  },
+  {
+    "name": "audit",
+    "source_hint": "commands/audit (BulletTrain parity)",
+    "responsibility": "Query audit logs — compliance and audit trail for BulletTrain"
+  },
+  {
+    "name": "theme",
+    "source_hint": "commands/theme (BulletTrain parity)",
+    "responsibility": "Manage UI themes — theme engine management for BulletTrain"
+  },
+  {
+    "name": "db",
+    "source_hint": "commands/db (BulletTrain parity)",
+    "responsibility": "Database operations — seed, reset, migrate for BulletTrain"
+  },
+  {
+    "name": "registry",
+    "source_hint": "commands/registry (Healthcare parity — GHARRA bridge)",
+    "responsibility": "Query the agent registry — Global Agent Registry discovery bridge for healthcare agent workflows"
+  },
+  {
+    "name": "a2a",
+    "source_hint": "commands/a2a (Healthcare parity — Nexus A2A bridge)",
+    "responsibility": "Agent-to-agent operations — Nexus A2A protocol bridge for clinical agent communication"
+  },
+  {
+    "name": "fhir",
+    "source_hint": "commands/fhir (Healthcare parity)",
+    "responsibility": "FHIR resource operations — FHIR R4 validation and transformation for healthcare interoperability"
   }
 ]

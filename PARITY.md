@@ -227,6 +227,51 @@ Build/test/manual verification is tracked separately below and must pass before 
 
 ---
 
+---
+
+## 8) BulletTrain / Healthcare Slash Command Parity (NEW)
+
+### Added in this branch
+
+15 new slash commands were added to `rust/crates/commands/src/lib.rs` to bridge BulletTrain SaaS patterns and healthcare agent workflows into the CLI:
+
+**BulletTrain SaaS commands (12):**
+- `/scaffold <Model> [field:type...]` — Super Scaffolding parity
+- `/scaffold:api <Model> [field:type...]` — API-only scaffolding
+- `/scaffold:join <ModelA> <ModelB>` — join model generation
+- `/team [invite|remove|list|switch]` — team lifecycle
+- `/roles [list|create|assign]` — RBAC management
+- `/api [version create|endpoints list|token generate]` — API versioning
+- `/billing [plans list|subscribe|usage]` — billing lifecycle
+- `/action [create|trigger|list]` — action model management
+- `/webhook [create|test|list|delete]` — webhook lifecycle (alias: `/webhooks`)
+- `/audit [log --user --since]` — compliance audit trail
+- `/theme [set|list|customize]` — theme engine management
+- `/db [seed|reset|migrate]` — database operations (alias: `/database`)
+
+**Healthcare bridge commands (3):**
+- `/registry [list|discover|trust]` — Global Agent Registry (GHARRA) discovery bridge
+- `/a2a [send|status|agents]` — Nexus A2A protocol bridge
+- `/fhir [validate|transform|search]` — FHIR R4 resource operations
+
+### Parity impact
+- Total slash commands: **41** (was 26)
+- Resume-supported commands: **16** (was 14; added `/audit` and `/registry`)
+- Python command snapshot updated with all 15 new entries
+- Full traceability docs in `docs/REQUIREMENTS.md`, `docs/USE_CASES.md`, `docs/TEST_SCENARIOS.md`
+- Portable enhancement manifests in `docs/manifests/` for Global Agent Registry and Nexus A2A
+
+### Cross-repository enhancement manifests
+
+Portable patterns identified for downstream repos:
+
+| Target Repo | Manifest | Patterns | Requirements |
+|-------------|----------|----------|--------------|
+| `symphonix-health/global-agent-registry` | `docs/manifests/global-agent-registry-enhancements.json` | 4 patterns (plugin→agent reg, MCP→discovery, permissions→zero-trust, config→federation) | REQ-GAR-001 to REQ-GAR-012 |
+| `symphonix-health/nexus-a2a-protocol` | `docs/manifests/nexus-a2a-enhancements.json` | 5 patterns (hooks→admission, runtime→task exec, subprocess→agent isolation, session→audit, providers→multi-LLM) | REQ-N2A-001 to REQ-N2A-020 |
+
+---
+
 ## Highest-priority parity gaps after the critical bug fixes
 
 1. **Hook execution parity**

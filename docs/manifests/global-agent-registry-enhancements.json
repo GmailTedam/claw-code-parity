@@ -1,0 +1,55 @@
+{
+  "manifest_version": "1.0.0",
+  "date": "2026-04-05",
+  "source_repo": "gmailtedam/claw-code-parity",
+  "target_repo": "symphonix-health/global-agent-registry",
+  "description": "Portable patterns from claw-code-parity Rust implementation to enhance the Global Agent Registry (GHARRA)",
+  "patterns": [
+    {
+      "id": "GAR-001",
+      "name": "Plugin Manifest → Agent Registration",
+      "source_files": [
+        "rust/crates/plugins/src/lib.rs"
+      ],
+      "source_pattern": "PluginManifest struct with metadata (name, version, description, kind, permissions, hooks, lifecycle commands, tools)",
+      "adaptation": "Map plugin.json manifest schema to Agent Card schema — name, capabilities, endpoints, crypto material, transport config. Use InstalledPluginRegistry pattern for persistent agent registry with validation-on-write.",
+      "requirements": ["REQ-GAR-001", "REQ-GAR-002", "REQ-GAR-003"],
+      "test_scenarios": ["TS-GAR-001", "TS-GAR-002", "TS-GAR-003", "TS-GAR-004"]
+    },
+    {
+      "id": "GAR-002",
+      "name": "MCP Discovery → Agent Discovery",
+      "source_files": [
+        "rust/crates/runtime/src/mcp.rs",
+        "rust/crates/runtime/src/mcp_client.rs"
+      ],
+      "source_pattern": "McpConfigCollection with content-hash signatures, normalized naming (mcp__<server>__<tool>), scoped configs (User/Project/Local)",
+      "adaptation": "Map MCP server discovery to agent discovery endpoints. Agents register with transport configs (stdio/SSE/HTTP/WS). Registry normalizes identifiers and returns cache signatures.",
+      "requirements": ["REQ-GAR-004", "REQ-GAR-005", "REQ-GAR-006"],
+      "test_scenarios": ["TS-GAR-005", "TS-GAR-006", "TS-GAR-007", "TS-GAR-008"]
+    },
+    {
+      "id": "GAR-003",
+      "name": "Permission System → Zero-Trust Verification",
+      "source_files": [
+        "rust/crates/runtime/src/permissions.rs",
+        "rust/crates/runtime/src/hooks.rs"
+      ],
+      "source_pattern": "Three-mode PermissionPolicy (ReadOnly/WorkspaceWrite/DangerFullAccess) with deny→hook-override→allow→ask→escalation flow. Wildcard and prefix matching on extracted subjects.",
+      "adaptation": "Map to ABAC 9-rule categories. Flow becomes deny→trust-verification→allow→break-glass-escalation. Hook overrides map to trust anchor verification callbacks.",
+      "requirements": ["REQ-GAR-007", "REQ-GAR-008", "REQ-GAR-009"],
+      "test_scenarios": ["TS-GAR-009", "TS-GAR-010", "TS-GAR-011", "TS-GAR-012", "TS-GAR-013"]
+    },
+    {
+      "id": "GAR-004",
+      "name": "Layered Config → Federated Trust Policies",
+      "source_files": [
+        "rust/crates/runtime/src/config.rs"
+      ],
+      "source_pattern": "RuntimeConfig with 3-layer merge (User < Project < Local). ConfigSource enum scopes entries. Deep merge semantics for overlapping keys.",
+      "adaptation": "Map to Root < Sovereign < Organizational registry layers. Sovereign overrides Root within jurisdiction. Organizational cannot weaken Sovereign deny rules.",
+      "requirements": ["REQ-GAR-010", "REQ-GAR-011", "REQ-GAR-012"],
+      "test_scenarios": ["TS-GAR-014", "TS-GAR-015", "TS-GAR-016", "TS-GAR-017"]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "manifest_version": "1.0.0",
+  "date": "2026-04-05",
+  "source_repo": "gmailtedam/claw-code-parity",
+  "target_repo": "symphonix-health/nexus-a2a-protocol",
+  "description": "Portable patterns from claw-code-parity Rust implementation to enhance the Nexus A2A Protocol",
+  "patterns": [
+    {
+      "id": "N2A-001",
+      "name": "Hook Pipeline → 13-Point Route Admission",
+      "source_files": [
+        "rust/crates/runtime/src/hooks.rs",
+        "rust/crates/plugins/src/hooks.rs"
+      ],
+      "source_pattern": "HookRunner with pre/post tool-use hooks. Hooks execute as shell commands with JSON stdin, environment variables (HOOK_EVENT, HOOK_TOOL_NAME, etc.), exit-code signaling (0=allow, 2=deny). Supports HookAbortSignal for cancellation and HookProgressReporter for observability.",
+      "adaptation": "Each of 13 admission check points becomes an independent hook. Checks: (1) record status, (2) agent name validity, (3) namespace delegation, (4) trust anchors, (5) JWKS URI format, (6) thumbprint policy, (7) certificate-bound tokens, (8) policy tags, (9) jurisdiction/data-residency, (10) federated trust anchors, (11) protocol version, (12) feature flags, (13) transport endpoint reachability.",
+      "requirements": ["REQ-N2A-001", "REQ-N2A-002", "REQ-N2A-003", "REQ-N2A-004", "REQ-N2A-005"],
+      "test_scenarios": ["TS-N2A-001", "TS-N2A-002", "TS-N2A-003", "TS-N2A-004", "TS-N2A-005"]
+    },
+    {
+      "id": "N2A-002",
+      "name": "ConversationRuntime → A2A Task Execution",
+      "source_files": [
+        "rust/crates/runtime/src/conversation.rs",
+        "rust/crates/runtime/src/compact.rs",
+        "rust/crates/runtime/src/usage.rs"
+      ],
+      "source_pattern": "ConversationRuntime<C, T> with generic ApiClient and ToolExecutor traits. Loop: Request→Stream→Parse→Execute Tools→Record Results→Loop. Features auto-compaction at token threshold, usage tracking, session tracing.",
+      "adaptation": "Map to A2A task lifecycle: Accept→Checkpoint→Complete/Escalate→Reject. Each tool execution runs through admission hooks. Checkpoints are persisted via JSONL sessions. Auto-compaction preserves clinical context within token limits.",
+      "requirements": ["REQ-N2A-006", "REQ-N2A-007", "REQ-N2A-008", "REQ-N2A-009"],
+      "test_scenarios": ["TS-N2A-006", "TS-N2A-007", "TS-N2A-008", "TS-N2A-009", "TS-N2A-010"]
+    },
+    {
+      "id": "N2A-003",
+      "name": "Subprocess Extension → Clinical Agent Isolation",
+      "source_files": [
+        "rust/crates/plugins/src/lib.rs"
+      ],
+      "source_pattern": "Plugins execute as subprocess commands with JSON I/O. Environment variables expose context (CLAWD_PLUGIN_ID, CLAWD_TOOL_NAME, CLAWD_TOOL_INPUT). Exit codes signal success/failure.",
+      "adaptation": "Each of 25 clinical agents runs as isolated subprocess. Receives FHIR payload via stdin JSON, returns structured result via stdout JSON. Environment variables: AGENT_ID, TASK_ID, PATIENT_CONTEXT_HASH.",
+      "requirements": ["REQ-N2A-010", "REQ-N2A-011", "REQ-N2A-012", "REQ-N2A-013"],
+      "test_scenarios": ["TS-N2A-011", "TS-N2A-012", "TS-N2A-013", "TS-N2A-014"]
+    },
+    {
+      "id": "N2A-004",
+      "name": "Session Management → Clinical Audit Trail",
+      "source_files": [
+        "rust/crates/runtime/src/session.rs"
+      ],
+      "source_pattern": "JSONL-persisted sessions with rotation after 256KB. Tracks version, session_id, timestamps, message blocks, compaction history, fork lineage (parent tracking). Immutable message appending with atomic file writes.",
+      "adaptation": "A2A exchanges persisted as JSONL session records. Fork lineage enables clinical conversation chain auditing. Add hash-chaining for tamper evidence (new requirement for healthcare compliance).",
+      "requirements": ["REQ-N2A-014", "REQ-N2A-015", "REQ-N2A-016", "REQ-N2A-017"],
+      "test_scenarios": ["TS-N2A-015", "TS-N2A-016", "TS-N2A-017", "TS-N2A-018"]
+    },
+    {
+      "id": "N2A-005",
+      "name": "Provider Abstraction → Multi-LLM Agent Backends",
+      "source_files": [
+        "rust/crates/api/src/client.rs",
+        "rust/crates/api/src/providers/mod.rs",
+        "rust/crates/api/src/providers/anthropic.rs",
+        "rust/crates/api/src/providers/openai_compat.rs"
+      ],
+      "source_pattern": "ProviderClient enum (Anthropic/xAI/OpenAI) via common Provider trait. Model aliasing (opus→claude-opus-4-6, grok→grok-3). Per-provider auth env vars and base URL overrides.",
+      "adaptation": "Generalize to Bevan/Claude/GPT-5.4/DeepSeek per-agent configuration. Data-residency rules force Bevan for patient data. Failover configurable per agent.",
+      "requirements": ["REQ-N2A-018", "REQ-N2A-019", "REQ-N2A-020"],
+      "test_scenarios": ["TS-N2A-019", "TS-N2A-020", "TS-N2A-021", "TS-N2A-022"]
+    }
+  ]
+}

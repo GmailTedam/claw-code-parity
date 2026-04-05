@@ -230,6 +230,112 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
         argument_hint: None,
         resume_supported: true,
     },
+    // --- BulletTrain / Healthcare parity commands ---
+    SlashCommandSpec {
+        name: "scaffold",
+        aliases: &[],
+        summary: "Generate model scaffolding with fields",
+        argument_hint: Some("<Model> [field:type...]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "scaffold:api",
+        aliases: &[],
+        summary: "Generate API-only scaffold",
+        argument_hint: Some("<Model> [field:type...]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "scaffold:join",
+        aliases: &[],
+        summary: "Generate join model between two models",
+        argument_hint: Some("<ModelA> <ModelB>"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "team",
+        aliases: &[],
+        summary: "Manage team members and invitations",
+        argument_hint: Some("[invite <email>|remove <email>|list|switch <name>]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "roles",
+        aliases: &[],
+        summary: "Manage role definitions",
+        argument_hint: Some("[list|create <name>|assign <role> <user>]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "api",
+        aliases: &[],
+        summary: "Manage API versions and endpoints",
+        argument_hint: Some("[version create <v>|endpoints list|token generate]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "billing",
+        aliases: &[],
+        summary: "Manage billing plans and subscriptions",
+        argument_hint: Some("[plans list|subscribe <plan>|usage]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "action",
+        aliases: &[],
+        summary: "Manage action models",
+        argument_hint: Some("[create <Name> --target=<Model>|trigger <Name>|list]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "webhook",
+        aliases: &["webhooks"],
+        summary: "Manage webhooks and integrations",
+        argument_hint: Some("[create <url>|test <id>|list|delete <id>]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "audit",
+        aliases: &[],
+        summary: "Query audit logs",
+        argument_hint: Some("[log --user=<email> --since=<duration>]"),
+        resume_supported: true,
+    },
+    SlashCommandSpec {
+        name: "theme",
+        aliases: &[],
+        summary: "Manage UI themes",
+        argument_hint: Some("[set <name>|list|customize]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "db",
+        aliases: &["database"],
+        summary: "Database operations",
+        argument_hint: Some("[seed|reset|migrate]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "registry",
+        aliases: &[],
+        summary: "Query the agent registry",
+        argument_hint: Some("[list|discover <capability>|trust <agent-id>]"),
+        resume_supported: true,
+    },
+    SlashCommandSpec {
+        name: "a2a",
+        aliases: &[],
+        summary: "Agent-to-agent operations",
+        argument_hint: Some("[send <agent> <payload>|status <task-id>|agents]"),
+        resume_supported: false,
+    },
+    SlashCommandSpec {
+        name: "fhir",
+        aliases: &[],
+        summary: "FHIR resource operations",
+        argument_hint: Some("[validate <resource>|transform <bundle>|search <type>]"),
+        resume_supported: false,
+    },
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -290,6 +396,57 @@ pub enum SlashCommand {
         args: Option<String>,
     },
     Skills {
+        args: Option<String>,
+    },
+    // --- BulletTrain / Healthcare parity commands ---
+    Scaffold {
+        args: Option<String>,
+    },
+    ScaffoldApi {
+        args: Option<String>,
+    },
+    ScaffoldJoin {
+        args: Option<String>,
+    },
+    Team {
+        action: Option<String>,
+        target: Option<String>,
+    },
+    Roles {
+        action: Option<String>,
+        target: Option<String>,
+    },
+    Api {
+        args: Option<String>,
+    },
+    Billing {
+        args: Option<String>,
+    },
+    Action {
+        args: Option<String>,
+    },
+    Webhook {
+        action: Option<String>,
+        target: Option<String>,
+    },
+    Audit {
+        args: Option<String>,
+    },
+    Theme {
+        action: Option<String>,
+        target: Option<String>,
+    },
+    Db {
+        action: Option<String>,
+    },
+    Registry {
+        action: Option<String>,
+        target: Option<String>,
+    },
+    A2a {
+        args: Option<String>,
+    },
+    Fhir {
         args: Option<String>,
     },
     Unknown(String),
@@ -365,6 +522,69 @@ impl SlashCommand {
                 args: remainder_after_command(trimmed, command),
             },
             "skills" => Self::Skills {
+                args: remainder_after_command(trimmed, command),
+            },
+            // --- BulletTrain / Healthcare parity commands ---
+            "scaffold" => Self::Scaffold {
+                args: remainder_after_command(trimmed, command),
+            },
+            "scaffold:api" => Self::ScaffoldApi {
+                args: remainder_after_command(trimmed, command),
+            },
+            "scaffold:join" => Self::ScaffoldJoin {
+                args: remainder_after_command(trimmed, command),
+            },
+            "team" => Self::Team {
+                action: parts.next().map(ToOwned::to_owned),
+                target: {
+                    let remainder = parts.collect::<Vec<_>>().join(" ");
+                    (!remainder.is_empty()).then_some(remainder)
+                },
+            },
+            "roles" => Self::Roles {
+                action: parts.next().map(ToOwned::to_owned),
+                target: {
+                    let remainder = parts.collect::<Vec<_>>().join(" ");
+                    (!remainder.is_empty()).then_some(remainder)
+                },
+            },
+            "api" => Self::Api {
+                args: remainder_after_command(trimmed, command),
+            },
+            "billing" => Self::Billing {
+                args: remainder_after_command(trimmed, command),
+            },
+            "action" => Self::Action {
+                args: remainder_after_command(trimmed, command),
+            },
+            "webhook" | "webhooks" => Self::Webhook {
+                action: parts.next().map(ToOwned::to_owned),
+                target: {
+                    let remainder = parts.collect::<Vec<_>>().join(" ");
+                    (!remainder.is_empty()).then_some(remainder)
+                },
+            },
+            "audit" => Self::Audit {
+                args: remainder_after_command(trimmed, command),
+            },
+            "theme" => Self::Theme {
+                action: parts.next().map(ToOwned::to_owned),
+                target: parts.next().map(ToOwned::to_owned),
+            },
+            "db" | "database" => Self::Db {
+                action: parts.next().map(ToOwned::to_owned),
+            },
+            "registry" => Self::Registry {
+                action: parts.next().map(ToOwned::to_owned),
+                target: {
+                    let remainder = parts.collect::<Vec<_>>().join(" ");
+                    (!remainder.is_empty()).then_some(remainder)
+                },
+            },
+            "a2a" => Self::A2a {
+                args: remainder_after_command(trimmed, command),
+            },
+            "fhir" => Self::Fhir {
                 args: remainder_after_command(trimmed, command),
             },
             other => Self::Unknown(other.to_string()),
@@ -1213,6 +1433,21 @@ pub fn handle_slash_command(
         | SlashCommand::Plugins { .. }
         | SlashCommand::Agents { .. }
         | SlashCommand::Skills { .. }
+        | SlashCommand::Scaffold { .. }
+        | SlashCommand::ScaffoldApi { .. }
+        | SlashCommand::ScaffoldJoin { .. }
+        | SlashCommand::Team { .. }
+        | SlashCommand::Roles { .. }
+        | SlashCommand::Api { .. }
+        | SlashCommand::Billing { .. }
+        | SlashCommand::Action { .. }
+        | SlashCommand::Webhook { .. }
+        | SlashCommand::Audit { .. }
+        | SlashCommand::Theme { .. }
+        | SlashCommand::Db { .. }
+        | SlashCommand::Registry { .. }
+        | SlashCommand::A2a { .. }
+        | SlashCommand::Fhir { .. }
         | SlashCommand::Unknown(_) => None,
     }
 }
@@ -1461,6 +1696,115 @@ mod tests {
                 target: Some("incident-review".to_string())
             })
         );
+        // BulletTrain / Healthcare parity commands
+        assert_eq!(
+            SlashCommand::parse("/scaffold Patient name:string dob:date"),
+            Some(SlashCommand::Scaffold {
+                args: Some("Patient name:string dob:date".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/scaffold:api Appointment"),
+            Some(SlashCommand::ScaffoldApi {
+                args: Some("Appointment".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/scaffold:join Patient Provider"),
+            Some(SlashCommand::ScaffoldJoin {
+                args: Some("Patient Provider".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/team invite doctor@hospital.org"),
+            Some(SlashCommand::Team {
+                action: Some("invite".to_string()),
+                target: Some("doctor@hospital.org".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/roles create clinician"),
+            Some(SlashCommand::Roles {
+                action: Some("create".to_string()),
+                target: Some("clinician".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/api version create v2"),
+            Some(SlashCommand::Api {
+                args: Some("version create v2".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/billing usage"),
+            Some(SlashCommand::Billing {
+                args: Some("usage".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/action create DischargePatient --target=Admission"),
+            Some(SlashCommand::Action {
+                args: Some("create DischargePatient --target=Admission".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/webhook create https://ehr.local/hook"),
+            Some(SlashCommand::Webhook {
+                action: Some("create".to_string()),
+                target: Some("https://ehr.local/hook".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/webhooks list"),
+            Some(SlashCommand::Webhook {
+                action: Some("list".to_string()),
+                target: None
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/audit log --user=dr.smith@hospital.org --since=7d"),
+            Some(SlashCommand::Audit {
+                args: Some("log --user=dr.smith@hospital.org --since=7d".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/theme set dark"),
+            Some(SlashCommand::Theme {
+                action: Some("set".to_string()),
+                target: Some("dark".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/db migrate"),
+            Some(SlashCommand::Db {
+                action: Some("migrate".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/database seed"),
+            Some(SlashCommand::Db {
+                action: Some("seed".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/registry discover triage"),
+            Some(SlashCommand::Registry {
+                action: Some("discover".to_string()),
+                target: Some("triage".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/a2a send triage-agent payload"),
+            Some(SlashCommand::A2a {
+                args: Some("send triage-agent payload".to_string())
+            })
+        );
+        assert_eq!(
+            SlashCommand::parse("/fhir validate Patient.json"),
+            Some(SlashCommand::Fhir {
+                args: Some("validate Patient.json".to_string())
+            })
+        );
     }
 
     #[test]
@@ -1497,8 +1841,26 @@ mod tests {
         assert!(help.contains("aliases: /plugins, /marketplace"));
         assert!(help.contains("/agents"));
         assert!(help.contains("/skills"));
-        assert_eq!(slash_command_specs().len(), 26);
-        assert_eq!(resume_supported_slash_commands().len(), 14);
+        // BulletTrain / Healthcare parity commands
+        assert!(help.contains("/scaffold <Model> [field:type...]"));
+        assert!(help.contains("/scaffold:api <Model> [field:type...]"));
+        assert!(help.contains("/scaffold:join <ModelA> <ModelB>"));
+        assert!(help.contains("/team"));
+        assert!(help.contains("/roles"));
+        assert!(help.contains("/api"));
+        assert!(help.contains("/billing"));
+        assert!(help.contains("/action"));
+        assert!(help.contains("/webhook"));
+        assert!(help.contains("aliases: /webhooks"));
+        assert!(help.contains("/audit"));
+        assert!(help.contains("/theme"));
+        assert!(help.contains("/db"));
+        assert!(help.contains("aliases: /database"));
+        assert!(help.contains("/registry"));
+        assert!(help.contains("/a2a"));
+        assert!(help.contains("/fhir"));
+        assert_eq!(slash_command_specs().len(), 41);
+        assert_eq!(resume_supported_slash_commands().len(), 16);
     }
 
     #[test]
@@ -1618,6 +1980,57 @@ mod tests {
         );
         assert!(
             handle_slash_command("/plugins list", &session, CompactionConfig::default()).is_none()
+        );
+        // BulletTrain / Healthcare parity commands are runtime-bound
+        assert!(
+            handle_slash_command("/scaffold Patient", &session, CompactionConfig::default())
+                .is_none()
+        );
+        assert!(
+            handle_slash_command("/scaffold:api Foo", &session, CompactionConfig::default())
+                .is_none()
+        );
+        assert!(
+            handle_slash_command("/scaffold:join A B", &session, CompactionConfig::default())
+                .is_none()
+        );
+        assert!(
+            handle_slash_command("/team list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/roles list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/api endpoints list", &session, CompactionConfig::default())
+                .is_none()
+        );
+        assert!(
+            handle_slash_command("/billing usage", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/action list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/webhook list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/audit log", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/theme list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/db migrate", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/registry list", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/a2a agents", &session, CompactionConfig::default()).is_none()
+        );
+        assert!(
+            handle_slash_command("/fhir validate x", &session, CompactionConfig::default())
+                .is_none()
         );
     }
 
