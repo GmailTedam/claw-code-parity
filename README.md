@@ -83,8 +83,30 @@ This repository now focuses on Python porting work instead.
 
 ```text
 .
-├── src/                                # Python porting workspace
-│   ├── __init__.py
+├── src/                                # Python porting workspace (60+ modules — see directory for full listing)
+│   ├── assistant/
+│   ├── bootstrap/
+│   ├── bridge/
+│   ├── buddy/
+│   ├── cli/
+│   ├── components/
+│   ├── coordinator/
+│   ├── entrypoints/
+│   ├── hooks/
+│   ├── keybindings/
+│   ├── memdir/
+│   ├── migrations/
+│   ├── native_ts/
+│   ├── plugins/
+│   ├── schemas/
+│   ├── screens/
+│   ├── server/
+│   ├── services/
+│   ├── skills/
+│   ├── state/
+│   ├── types/
+│   ├── utils/
+│   ├── voice/
 │   ├── commands.py
 │   ├── main.py
 │   ├── models.py
